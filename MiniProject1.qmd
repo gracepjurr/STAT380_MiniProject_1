@@ -1,25 +1,74 @@
 ---
 title: "MiniProject1"
-format: html
+author: "Grace Rubio, Oyinda Sanni, Mia Mason"
+format: pdf
 ---
 
-## Quarto
+**Important Note** All code needs to have an answer to the "Where did u get ur code" question
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
+# Preparing the Data
+## Importing Data
+TODO:
+1. Import the data
 ```{r}
-1 + 1
+
 ```
 
-You can add options to executable code like this 
-
+## Wrangling Data
+TODO:
+1. Combine all the data into a large dataset
 ```{r}
-#| echo: false
-2 * 2
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+# Variable Report
+TODO:
+1. Identify each variable
+2. Type of each variable
+3. Information about the types of values the variable can take
+4. Amount of missing data within the variable
+
+## Cleaning Data
+```{r}
+
+```
+
+## Summary Statistics
+TODO:
+1. Categorical variables: create a table of possible values and include counts or proportions.
+  1a. Create an appropriate plot to show   distribution of values
+2. Quantitative variables: include basic summary stats like mean, median, standard deviation, min, max, etc.
+  2a. Create an appropriate plot to show distribution of values
+3. Look up country involved for any extreme outliers
+```{r}
+
+```
+
+
+## Variable Descriptions
+TODO:
+1. Write a few sentences for each variable to describe what we have learned about the variable. Incorporate information from the Summary Statistics
+
+# Linear Models
+TODO:
+1. Make at least 3 linear models (1 simple, 2 multivariate)
+2. Evaluate the models for LINE(Q-Q plots needed), p-values ,R2, and adjusted R2, RSE, MSE, RMSE
+```{r}
+
+```
+
+
+# Comparing Models
+TODO:
+1. Which model is the best?
+
+# Questions About the Data
+TODO:
+1. Ask a question (Should explore relationship between at least 2 variables in the dataset)
+2. Answer the question
+3. Create a graph/plot that helps answer the question
+
+```{r}
+
+```
+
