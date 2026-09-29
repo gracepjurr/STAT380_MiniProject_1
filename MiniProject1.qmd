@@ -141,7 +141,19 @@ Full_2025|>
 
 ### Variable Descriptions
 
-We can see that the distribution of total CO2 emissions across the listed countries is right-skewed with the majority of countries falling before the 1 billion tonnes mark. There are two main outliers of this variable (India and the US) that likely have an impact on our summary results, so that should be taken into account with later analysis. Given the results of our summary for this variable, we can see that the average CO2 emission per country is about 137.15 million tonnes. By comparing the mean to our median (17.7 million tonnes), the right-skewness of the data becomes more apparent as the difference between the average CO2 emission and the middle value further suggests the outliers are pulling the mean up. The IQR is helpful for this skewed distribution, as it tells us that the middle 50% of countries have CO₂ emissions within a range of about 70 million tonnes.
+We can see that the distribution of total CO2 emissions across the
+listed countries is right-skewed with the majority of countries falling
+before the 1 billion tonnes mark. There are two main outliers of this
+variable (India and the US) that likely have an impact on our summary
+results, so that should be taken into account with later analysis. Given
+the results of our summary for this variable, we can see that the
+average CO2 emission per country is about 137.15 million tonnes. By
+comparing the mean to our median (17.7 million tonnes), the
+right-skewness of the data becomes more apparent as the difference
+between the average CO2 emission and the middle value further suggests
+the outliers are pulling the mean up. The IQR is helpful for this skewed
+distribution, as it tells us that the middle 50% of countries have CO₂
+emissions within a range of about 70 million tonnes.
 
 ## GDP per Capita
 
