@@ -252,9 +252,147 @@ TODO: 1. Make at least 3 linear models (1 simple, 2 multivariate) 2.
 Evaluate the models for LINE(Q-Q plots needed), p-values ,R2, and
 adjusted R2, RSE, MSE, RMSE
 
+## GDP per Capita: Simple Linear Model 
+
 ```{r}
+lifegdp=Full_2025|>
+  lm(life_Exp~GDP, data= _) 
+lifegdp
+```
+### Interpreting the Slope
+
+*Equation:* $\hat{y}_{LifeExp}=0.6851+0.0001935x_{GDP}$
+
+*Slope:* 0.0001935
+
+*Interpretation:* The slope of this model tells us that For every \$1 increase in gdp per capita there will be a 0.0001935 year increase in predicted life expectancy. In other words, the predicted life expectancy of a country increases by 1.9 years for every \$10,000 increase in GDP.
+
+### Evaluating the Model
+
+```{r}
+plot(lifegdp, which = 1)
+plot(lifegdp, which = 2) 
+```
+L - Bad. The residuals vs fitted plot shows us a poor linearity between the variables. We can see this because the points do not cluster/ evenly distribute around zero. We can aslo see the line curve downwards as the fitted values increase. 
+
+I - Not good. There are patterns in the geographic location/region of the data. As such, we cannot assume independence. 
+
+N - Ok. The Q-Q plot shows the data lying closely along the line for (the most part). While there is some minor divergence (especially towards the end), we can still say that it is reasonable to assume general normal distribution among the variables.  
+
+E - Bad. The variance declines as fitted value increases (i.e., the variance is NOT constant). 
+
+### Model Summary 
+```{r}
+summary(lifegdp)
+```
+#### p-value
+
+**p-value=2.2e-16**
+
+Since the p-value is very small (threshold: $p<=0.05$), we can say that the slope is significantly different from 0.
+
+#### $R^2$
+
+$R^2 = 0.5041$
+
+50.41% of the variation of life expectancy is explained by the linear model including gdp per capita.
+
+#### RSE
+
+$RSE = 4.93$
+
+The "average" distance of the life expectancy from its predicted value is about 5 years.
+
+## Poverty & CO2 Emissions: Multivariate Model
+
+```{r}
+firstmultiv=Full_2025|>
+  lm(life_Exp~CO2+Poverty, data= _) 
+firstmultiv
+```
+
+### Interpreting the Slope
+
+*Equation:* $x$
+
+*Slope:* 
+
+*Interpretation:*
+
+### Evaluating the Model
+
+```{r}
+plot(firstmultiv, which = 1)
+plot(firstmultiv, which = 2) 
+```
+
+L - 
+
+I - 
+
+N - 
+
+E - 
+
+### Model Summary 
+
+```{r}
+summary(firstmultiv)
+```
+
+#### p-value(s)
+
+#### $R^2$
+
+#### Adjusted $R^2$
+
+#### RSE
+
+## Human Development Index & GDP & Region: Multivariate Model
+
+```{r}
+secondmultiv=Full_2025|>
+  lm(life_Exp~HumDevIndx+GDP+world_4region, data= _) 
+secondmultiv
 
 ```
+
+### Interpreting the Slope
+
+*Equation:* $x$
+
+*Slope:* 
+
+*Interpretation:*
+
+### Evaluating the Model
+
+```{r}
+plot(secondmultiv, which = 1)
+plot(secondmultiv, which = 2) 
+```
+
+L - 
+
+I - 
+
+N - 
+
+E - 
+
+### Model Summary 
+
+```{r}
+summary(secondmultiv)
+```
+
+#### p-value(s)
+
+#### $R^2$
+
+#### Adjusted $R^2$
+
+#### RSE
 
 # Comparing Models
 
@@ -266,6 +404,10 @@ TODO: 1. Ask a question (Should explore relationship between at least 2
 variables in the dataset) 2. Answer the question 3. Create a graph/plot
 that helps answer the question
 
+*Question:*
+
 ```{r}
 
 ```
+
+*Answer:*
