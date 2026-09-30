@@ -1,25 +1,897 @@
 ---
 title: "MiniProject1"
-format: html
+author: "Grace Rubio, Oyinda Sanni, Mia Mason"
+format: pdf 
+editor:    
+  markdown:      
+    wrap: 72 
 ---
 
-## Quarto
+**Important Note** All code needs to have an answer to the "Where did u
+get ur code" question
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+# Preparing the Data
 
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
-```{r}
-1 + 1
-```
-
-You can add options to executable code like this 
+## Load in packages
 
 ```{r}
-#| echo: false
-2 * 2
+#| label: setup 
+#| include: false
+#| library(tidyverse)
+#| library(tidymodels)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+## Importing Data
+
+1.  Import the data
+
+```{r}
+# Response Variable
+life_exp <-read_csv("Data/lex.csv")   
+# Predictor Variables 
+CO2_emissions <-read_csv("Data/co2_cons.csv")
+gdp <-read_csv("Data/gdp_pcap.csv")
+humanDevIndx <-read_csv("Data/hdi_human_development_index.csv")
+poverty<-read_csv("Data/number_of_people_in_poverty.csv")
+gapminder_2025<-read_csv("Data/gapminder_2025.csv") # QUALITATIVE (regions) 
+```
+
+## Wrangling Data
+
+TODO: 1. Combine all the data into a large dataset
+
+*NOTE:* We will use the last recorded year for the datasets that do not
+have a 2025 entry.
+
+```{r}
+data_lst<- list(CO2_emissions, gdp, humanDevIndx, poverty, gapminder_2025)
+
+Full_2025<-life_exp 
+for (dataset in data_lst){  
+  Full_2025 <- Full_2025|>
+    full_join(dataset, by="geo")
+}
+
+Full_2025<-Full_2025|>
+  select(geo,name.x,`2025.x`, # keep life_exp 2025 columns
+         `2022.y`, # keep 2025 co2 column
+         `2025.y`,  # keep 2025 gdp column
+         `2023.x.x`,  # keep 2025 humanDevIdnx column
+         `2025`,     # keep 2025 poverty column
+         world_4region # keep 2025 regions column
+         )|>
+  rename(name = name.x, #rename columns for clarity
+         life_Exp=`2025.x`,
+         CO2=`2022.y`,
+         GDP=`2025.y`,
+         Poverty = `2025`,
+         HumDevIndx= `2023.x.x`
+         ) 
+```
+
+# Variable Report
+
+TODO: 1. Identify each variable 2. Type of each variable 3. Information
+about the types of values the variable can take 4. Amount of missing
+data within the variable 5. Check if cleaning is needed and clean the
+data.
+
+## Data Cleaning
+
+For the most part the `Full_2025` table is tidy. The main issue with the
+table is with the missing values in a few of the variables. As such, we
+will clean the table by removing all missing entries.
+
+*Note:* Below, we further identify issues with each individual variable
+specifically. This way, we can explicitly distinguish if/why the
+cleaning performed in this section was necessary.
+
+```{r}
+# Clean the Data
+Full_2025<-Full_2025|>   
+  drop_na()
+```
+
+## Life Expectancy at Birth
+
+*Type:* This variable type is quantitative.
+
+*Info:* The Life Expectancy at Birth variable is the average number of
+years a hypothetical newborn child will live if the age-specific
+mortality rates observed in a country during that specific year were to
+remain constant throughout their lifetime. It is an accumulation of
+broader health standards, healthcare access, sanitation, nutrition, and
+disease exposure in the given country.
+
+### Summary Statistics
+
+```{r}
+#| echo: true
+#| fig-align: center  
+
+# SUMMARY
+LifeExp_summary <- Full_2025|>
+  summarize(avg_LifeExp = mean(life_Exp),
+            sd_LifeExp = sd(life_Exp),
+            min_LifeExp = min(life_Exp),
+            max_LifeExp = max(life_Exp),
+            mdn_LifeExp = median(life_Exp),
+            iqr = IQR(life_Exp),
+            sample_size = n())
+LifeExp_summary
+
+# PLOT
+Full_2025|>
+  ggplot(mapping = aes(x = life_Exp)) +
+  geom_histogram(binwidth = 3, color = '#ACC7B4', fill = "#331B3F") +
+  labs(x = "Total Life Expectancy",
+       y = "Count",
+       title = "Count of Country's Total Life Expectancy at Birth")
+```
+
+### Variable Descriptions
+
+The distribution of the variable is slightly left skewed with the
+majority of the countries life expectancy being concentrated between 70
+and 80 years. There are no severe outliers visible in the distribution.
+The minimum life expectancy is 55.48 years, and the maximum is 85.71
+years. Given the results of the summary table for the variable, the
+average life expectancy at birth is approximately 73.31 years, with a
+standard deviation of 6.98 years. When comparing the mean to the median
+of 74.12 years, this highlights the slight left skew as the countries
+with shorter life expediencies pull the mean slightly below the median
+value. The IQR says that the middle 50% of countries fall within a range
+of about 10.29 years.
+
+## CO2 Emissions
+
+*Type:* This variable type is quantitative.
+
+*Info:* This variable is the carbondioxide total (consumption based).
+This variable can take numeric or NAN values. The CO2 emissions column
+is measured in million tonnes of CO2. There are currently two missing
+entries in the variable, so this column does require some cleaning.
+
+### Summary Statistics (By Itself)
+
+```{r}
+#| echo: true
+#| fig-align: center  
+
+# SUMMARY
+CO2_summary <- Full_2025|>
+  summarize(avg_CO2 = mean(CO2),
+            sd_CO2 = sd(CO2),
+            min_CO2 = min(CO2),
+            max_CO2 = max(CO2),
+            mdn_CO2 = median(CO2),
+            iqr = IQR(CO2),
+            sample_size = n())
+CO2_summary
+
+# PLOT
+Full_2025|>
+  ggplot(mapping=aes(x = CO2)) +
+  geom_histogram(binwidth = 300, color = '#ACC7B4', fill = "#331B3F") +
+  labs(x = "Total CO2 Emissions (Million Tonnes)",
+       y = "Count",
+       title = "Count of Country's Total CO2 Emission")+
+
+  # Add markers to identify outliers
+  geom_point(data = Full_2025[Full_2025$CO2 > 2000,],
+             aes(x = CO2, y = 0),
+             color = "red", shape = 1, size = 12) 
+
+```
+
+### Summary Statistics (W/ Response Variable)
+
+```{r}
+#| echo: true
+#| fig-align: center  
+
+#SUMMARY
+LifeExp_CO2_summary <- Full_2025|>
+  summarize(avg_LifeExp = mean(life_Exp),
+            sd_LifeExp = sd(life_Exp),
+            min_LifeExp = min(life_Exp),
+            max_LifeExp = max(life_Exp),
+            mdn_LifeExp = median(life_Exp),
+            iqr_LifeExp = IQR(life_Exp),
+            
+            avg_CO2 = mean(CO2),
+            sd_CO2 = sd(CO2),
+            min_CO2 = min(CO2),
+            max_CO2 = max(CO2),
+            mdn_CO2 = median(CO2),
+            iqr_CO2 = IQR(CO2),
+            
+            sample_size = n())
+LifeExp_CO2_summary
+
+#PLOT
+Full_2025|>
+  ggplot(aes(x = CO2, y = life_Exp)) +
+  geom_point() +
+  labs(x = "CO2 emissions (Million Tonnes)",
+       y = "Life Expectancy at Birth",
+       title = "Life expectancy at Birth vs. CO2 Emissions")
+```
+
+### Variable Descriptions
+
+We can see that the distribution of total CO2 emissions across the
+listed countries is right-skewed with the majority of countries falling
+before the 1 billion tonnes mark. There are two main outliers of this
+variable (India and the US) that likely have an impact on our summary
+results, so that should be taken into account with later analysis. Given
+the results of our summary for this variable, we can see that the
+average CO2 emission per country is about 137.15 million tonnes. By
+comparing the mean to our median (17.7 million tonnes), the
+right-skewness of the data becomes more apparent as the difference
+between the average CO2 emission and the middle value further suggests
+the outliers are pulling the mean up. The IQR is helpful for this skewed
+distribution, as it tells us that the middle 50% of countries have CO₂
+emissions within a range of about 70 million tonnes.
+
+## GDP per Capita
+
+*Type:* This variable type is quantitative.
+
+*Info:* GDP per capita is the gross domestic product which is the total
+moetary value of all goods and services produced in a country in a given
+year. The values in this dataset are stored as float values. GDP per
+capita is recorded in US dollars, specifically PPP\$ or purchasing power
+parity, and values are adjusted for inflation.
+
+### Summary Statistics (By Itself)
+
+```{r}
+#| echo: true
+#| fig-align: center
+
+# SUMMARY
+GDP_summary <- Full_2025|>
+  summarize(avg_GDP = mean(GDP),
+            sd_GDP = sd(GDP),
+            min_GDP = min(GDP),
+            max_GDP = max(GDP),
+            mdn_GDP = median(GDP),
+            iqr = IQR(GDP),
+            sample_size = n())
+GDP_summary
+
+# PLOT
+Full_2025|>
+  ggplot(mapping=aes(x = GDP)) +
+  geom_histogram(binwidth = 3000, color = '#ACC7B4', fill = "#331B3F") +
+  labs(x = "Total GDP per Capita (Dollars)",
+       y = "Count",
+       title = "Count of Country's Total GDP per Capita")+
+# Add markers to identify outliers
+  geom_point(data = Full_2025[Full_2025$GDP > 90000,],
+             aes(x = GDP, y = 0),
+             color = "red", shape = 1, size = 12)
+```
+
+### Summary Statistics (W/ Response Variable)
+
+```{r}
+#| echo: true
+#| fig-align: center  
+
+#SUMMARY
+LifeExp_GDP_summary <- Full_2025|>
+  summarize(avg_LifeExp = mean(life_Exp),
+            sd_LifeExp = sd(life_Exp),
+            min_LifeExp = min(life_Exp),
+            max_LifeExp = max(life_Exp),
+            mdn_LifeExp = median(life_Exp),
+            iqr_LifeExp = IQR(life_Exp),
+            
+            avg_GDP = mean(GDP),
+            sd_GDP = sd(GDP),
+            min_GDP = min(GDP),
+            max_GDP = max(GDP),
+            mdn_GDP = median(GDP),
+            iqr_GDP = IQR(GDP),
+            
+            sample_size = n())
+LifeExp_GDP_summary
+
+#PLOT
+Full_2025|>
+  ggplot(aes(x = GDP, y = life_Exp)) +
+  geom_point() +
+  labs(x = "GDP per Capita (US$)",
+       y = "Life Expectancy at Birth",
+       title = "Life expectancy at Birth vs. GDP per Capita")
+```
+
+### Variable Descriptions
+
+The distribution of GDP per capita across the listed countries in the
+Full_2025 dataset is concentrated on the right side of the graph, with a
+majority of it being below \$25,000. There are four outliers which reach
+up to around \$140,000, causing the mean to be higher in the summary.
+Given the summary, the average GDP per capita is \~\$24,859, which
+comparing to the median of \$15,343 highlights the right-sided
+concentration. The IQR of \$32,353 provides a better sense of spread for
+this distribution, indicating that the middle 50% of countries fall
+within a range of roughly \$32,353.
+
+## Human Development Index
+
+*Type:* This variable type is quantitative.
+
+*Info:* The HumDevIndx variable is the measure of overall human
+well-being and development of a country. It combines three key
+dimensions of human development like health or longevity, education, and
+standard of living. These area measured by life expectancy at birth,
+mean years of schooling for adults and expected years of schooling for
+children, and the gross national income per capita respectively. The
+variable ranges from 0 to 1, where 1 indicates higher levels of human
+development, and is a float type.
+
+### Summary Statistics (By Itself)
+
+```{r}
+#| echo: true
+#| fig-align: center
+
+# SUMMARY
+HumDevIndx_summary <- Full_2025|>
+  summarize(avg_HDI = mean(HumDevIndx),
+            sd_HDI = sd(HumDevIndx),
+            min_HDI = min(HumDevIndx),
+            max_HDI = max(HumDevIndx),
+            mdn_HDI = median(HumDevIndx),
+            iqr = IQR(HumDevIndx),
+            sample_size = n())
+HumDevIndx_summary
+
+# PLOT
+Full_2025|>
+  ggplot(mapping=aes(x = HumDevIndx)) +
+  geom_histogram(binwidth = 0.02, color = '#ACC7B4', fill = "#331B3F") +
+  labs(x = "Total Human Development Index",
+       y = "Count",
+       title = "Count of Country's Total Human Development Index")
+```
+
+### Summary Statistics (W/ Response Variable)
+
+```{r}
+#| echo: true
+#| fig-align: center  
+
+#SUMMARY
+LifeExp_HDI_summary <- Full_2025|>
+  summarize(avg_LifeExp = mean(life_Exp),
+            sd_LifeExp = sd(life_Exp),
+            min_LifeExp = min(life_Exp),
+            max_LifeExp = max(life_Exp),
+            mdn_LifeExp = median(life_Exp),
+            iqr_LifeExp = IQR(life_Exp),
+            
+            avg_HDI = mean(HumDevIndx),
+            sd_HDI = sd(HumDevIndx),
+            min_HDI = min(HumDevIndx),
+            max_HDI = max(HumDevIndx),
+            mdn_HDI = median(HumDevIndx),
+            iqr_HDI = IQR(HumDevIndx),
+            
+            sample_size = n())
+LifeExp_HDI_summary
+
+#PLOT
+Full_2025|>
+  ggplot(aes(x = HumDevIndx, y = life_Exp)) +
+  geom_point() +
+  labs(x = "Human Development Index",
+       y = "Life Expectancy at Birth",
+       title = "Life expectancy at Birth vs. CO2 Emissions")
+```
+
+### Variable Descriptions
+
+The distribution of the HDI scores across the countries is concentrated
+to the left, with the majority of them having an HDI score above 0.7.
+There are no extreme outliers in the distribution due to the variable
+being bound to a scale with a minimum of 0.388 and a maximum of 0.972.
+Given the results of the summary for the variable, the average HDI score
+across countries is approximately 0.734. Comparing the mean to the
+median of 0.75, the slight left skew becomes apparent, as the middle
+value sits slightly higher than the average due to the tail of lower HDI
+scores bringing the mean down. The IQR shows that the middle 50% of
+countries fall within a narrow range of about 0.236.
+
+## People in Poverty
+
+*Type:* This variable type is quantitative.
+
+*Info:* The poverty variable records the estimated population in a
+country whose daily income or consumption falls before the international
+extreme poverty threshold. The unit of measure is number of people.
+
+### Summary Statistics (By Itself)
+
+```{r}
+#| echo: true
+#| fig-align: center
+
+# SUMMARY
+Poverty_summary <- Full_2025|>
+  summarize(avg_Poverty = mean(Poverty),
+            sd_Poverty = sd(Poverty),
+            min_Poverty = min(Poverty),
+            max_Poverty = max(Poverty),
+            mdn_Poverty = median(Poverty),
+            iqr = IQR(Poverty),
+            sample_size = n()) 
+Poverty_summary
+
+# PLOT
+Full_2025|>   
+  ggplot(mapping=aes(x = Poverty)) +
+  geom_histogram(binwidth = 3000000, color = '#ACC7B4', fill = "#331B3F") +
+  labs(x = "Total Poverty Population (Millions of People)",
+       y = "Count",
+       title = "Count of Country's Total Poverty Population")+
+
+# Add markers to identify outliers
+  geom_point(data = Full_2025[Full_2025$Poverty > 40000000,],
+             aes(x = Poverty, y = 0),
+             color = "red", shape = 1, size = 12)
+```
+
+### Summary Statistics (W/ Response Variable)
+
+```{r}
+#| echo: true
+#| fig-align: center  
+
+#SUMMARY
+LifeExp_Poverty_summary <- Full_2025|>
+  summarize(avg_LifeExp = mean(life_Exp),
+            sd_LifeExp = sd(life_Exp),
+            min_LifeExp = min(life_Exp),
+            max_LifeExp = max(life_Exp),
+            mdn_LifeExp = median(life_Exp),
+            iqr_LifeExp = IQR(life_Exp),
+            
+            avg_Poverty = mean(Poverty),
+            sd_Poverty = sd(Poverty),
+            min_Poverty = min(Poverty),
+            max_Poverty = max(Poverty),
+            mdn_Poverty = median(Poverty),
+            iqr_Poverty = IQR(Poverty),
+            
+            sample_size = n())
+LifeExp_Poverty_summary
+
+#PLOT
+Full_2025|>
+  ggplot(aes(x = Poverty, y = life_Exp)) +
+  geom_point() +
+  labs(x = "Ppulation of Poverty",
+       y = "Life Expectancy at Birth",
+       title = "Life expectancy at Birth vs. CO2 Emissions")
+```
+
+### Variable Descriptions
+
+The distribution of the total poverty population across the countries is
+very right-skewed, with the majority of them being clustered below 10
+million. There are four distinct outliers to the right with the maximum
+reaching a population as high as 95,605,313 people. This maximum value
+strongly influences the results of the summary table and should be taken
+into account for the analysis. From the summary results, the average
+poverty population per country is 4,615,385 people, and a very high
+standard deviation of 12,475,121. Comparing the mean to the median of
+182,163 people, the extreme right skew is very evident and shows how the
+few high-poverty countries inflate the mean. The IQR shoes that the
+middle 50% of countries have a poverty population spanning a range of
+about 2.42 million people.
+
+## Region
+
+*Type:* This variable type is categorical.
+
+*Info:* The region variable stores information about the continent in
+which the country is located in. The variable can be one of the four
+following values: americas (includes north and south), africa, asia, and
+europe.
+
+### Summary Statistics (By Itself)
+
+```{r}
+#| echo: true
+#| fig-align: center
+
+# SUMMARY
+region_summary <- Full_2025|>
+  group_by(world_4region) |>
+  summarize(count = n())
+region_summary  
+
+# PLOT 
+Full_2025|>
+  ggplot(mapping=aes(x = world_4region)) +
+  geom_bar(color = '#ACC7B4', fill = "#331B3F") +
+  labs(x = "World Regions",
+       y = "Count", 
+       title = "Distribution of Countries Across World Regions")
+```
+
+### Summary Statistics (W/ Response Variable)
+
+```{r}
+#| echo: true
+#| fig-align: center  
+
+#SUMMARY
+LifeExp_region_summary <- Full_2025|>
+  group_by(world_4region) |>
+  summarize(avg_LifeExp = mean(life_Exp),
+          sd_LifeExp = sd(life_Exp),
+          min_LifeExp = min(life_Exp),
+          max_LifeExp = max(life_Exp),
+          mdn_LifeExp = median(life_Exp),
+          iqr_LifeExp = IQR(life_Exp),
+          count = n())
+LifeExp_region_summary
+
+#PLOT
+Full_2025|>
+  ggplot(aes(x = world_4region, y = life_Exp)) +
+  geom_boxplot() +
+  labs(x = "World Regions",
+       y = "Life Expectancy at Birth",
+       title = "Life expectancy at Birth vs. World Regions")
+```
+
+### Variable Descriptions
+
+Africa and Asia are the most represented regions out of the countries in
+the dataset with their counts being 53 and 52 respectively. The Americas
+are the least represented world region being the minimum at 34 total
+countries.
+
+# Linear Models
+
+TODO: 1. Make at least 3 linear models (1 simple, 2 multivariate) 2.
+Evaluate the models for LINE(Q-Q plots needed), p-values ,R2, and
+adjusted R2, RSE, MSE, RMSE
+
+## GDP per Capita: Simple Linear Model
+
+```{r}
+lifegdp=Full_2025|>
+  lm(life_Exp~GDP, data= _) 
+lifegdp
+```
+
+### Interpreting the Slope
+
+*Equation:* $\hat{y}_{LifeExp}=68.51+0.0001935x_{GDP}$
+
+*Slope:* 0.0001935
+
+*Interpretation:* The slope of this model tells us that For every \$1
+increase in gdp per capita there will be a 0.0001935 year increase in
+predicted life expectancy. In other words, the predicted
+`life expectancy` of a country increases by 1.9 years for every \$10,000
+increase in `GDP`
+
+### Evaluating the Model
+
+```{r}
+plot(lifegdp, which = 1)
+plot(lifegdp, which = 2) 
+```
+
+L - Bad. The residuals vs fitted plot shows us a poor linearity between
+the variables. We can see this because the points do not cluster/ evenly
+distribute around zero. We can aslo see the line curve downwards as the
+fitted values increase.
+
+I - Not good. There are patterns in the geographic location/region of
+the data. As such, we cannot assume independence.
+
+N - Okay. The Q-Q plot shows the data lying closely along the line for
+(the most part). While there is some minor divergence (especially
+towards the end), we can still say that it is reasonable to assume
+general normal distribution among the variables.
+
+E - Bad. The variance declines as fitted value increases (i.e., the
+variance is NOT constant).
+
+### Model Summary
+
+```{r}
+summary(lifegdp)
+```
+
+#### p-value
+
+$p-value=2.2e-16$
+
+Since the p-value is very small (threshold: $p<=0.05$), we can say that
+the slope is significantly different from 0. Therefore it is
+*statistically significant*.
+
+#### $R^2$
+
+$R^2 = 0.5041$
+
+50.41% of the variation of life expectancy is explained by the linear
+model including gdp per capita.
+
+#### RSE
+
+$RSE = 4.93$
+
+The "average" distance of the life expectancy from its predicted value
+is about 5 years.
+
+## Poverty & Human Development Index: Multivariate Model
+
+```{r}
+firstmultiv=Full_2025|>
+  lm(life_Exp~HumDevIndx+Poverty, data= _) 
+firstmultiv
+```
+
+### Interpreting the Slope
+
+*Equation:*
+$\hat{y}_{LifeExp}=44.07+39.85x_{HumDevIndx}+0.000000003099x_{Poverty}$
+
+*Slope:*
+
+**Human Dev Index:** 39.85
+
+**Poverty:** 0.000000003099
+
+*Interpretation:*
+
+**Human Dev Index:** The predicted `life expectancy` increases by about
+4 years with every 0.1 unit increase in the `Human Development Index`,
+when the number of people in `poverty` remains constant.
+
+**Poverty:** The predicted `life expectancy` increases by about 0.31
+years with every 100 million person increase in the number of people in
+`poverty`, when the `Human Development Index` is held constant.
+
+### Evaluating the Model
+
+```{r}
+plot(firstmultiv, which = 1)
+plot(firstmultiv, which = 2) 
+```
+
+L - Good. The residuals vs fitted plot shows us a strong linearity
+between the variables since they cluster evenly about the zero line.
+
+I - Good. The data contains entries from individual countries for the
+your 2025 and do not repeat/ have duplicates. Therefore, it is
+reasonable to assume that the data has no direct relationship/ influence
+to each other.
+
+N - Okay. The Q-Q plot shows the data lying closely along the line with
+some dispersion at the ends of the data line. This means it is
+reasonable to assume a somewhat general normal distribution among the
+variables.
+
+E - Okay. The residuals vs fitted plot show a generally good fit. There
+is a bit more clustering/ tighter fit as the plot moves towards the
+right. This means there is an assumption of equal variance
+(Homoscedasticity), for the most part.
+
+### Model Summary
+
+```{r}
+summary(firstmultiv)
+```
+
+#### p-value(s)
+
+**HDI:** $p-value=2.2e-16$
+
+Since the p-value of the `HDI` is very small (threshold: $p<=0.05$), we
+can say that the slope is significantly different from 0. Therefore it
+is *statistically significant*.
+
+**Poverty:** $p-value=0.893$
+
+Since the p-value of the number of people in `Poverty` is not considered
+small (threshold: $p<=0.05$), we *cannot* say that the slope is
+significantly different from 0. Therefore it is NOT *statistically
+significant*.
+
+#### $R^2$
+
+$R^2 = 0.7499$
+
+This means that about 74.99% of the variation in `life expectancy` is
+explained by the model containing `HDI`and `Poverty`.
+
+#### Adjusted $R^2$
+
+$R^2_{adj}=0.7471$
+
+The adjusted $R^2$ value accounts for additional independent variables.
+Therefore, this tells us that about 74.71% of the variation in
+`life expectancy` is explained by the model containing `HDI`and
+`Poverty`.
+
+#### RSE
+
+$RSE=3.511$
+
+This means that the "average" distance of the `life expectancy` from its
+predicted value is about 3.5 years.
+
+## Human Dev Index & GDP & Region: Multivariate Model
+
+```{r}
+secondmultiv=Full_2025|>
+  lm(life_Exp~HumDevIndx+GDP+world_4region, data= _) 
+secondmultiv
+```
+
+### Interpreting the Slope
+
+*Equation:*
+$\hat{y}_{LifeExp}=48.59+29.95x_{HumDevIndx}+0.00002487x_{GDP}+3.412x_{americas}+2.621x_{asia}+3.201x_{europe}$
+
+*Slope:*
+
+**HDI:** 29.95
+
+**GDP:** 0.00002487
+
+**Region_americas:** 3.412
+
+**Region_asia:** 2.621
+
+**Region_europe:** 3.201
+
+**Region_africa:** This is our Categorical indicator. Note that if all
+other world_4regions are 0, then `world_4regionafrica` is 1.
+
+*Interpretation:*
+
+**Human Dev Index:** The predicted `life expectancy` increases by about
+3 years with every 0.1 unit increase in the `Human Development Index`,
+assuming all other variables remain constant (GDP and region).
+
+**GDP:** The predicted `life expectancy` increases by about 2.5 years
+with every \$100,000 increase in the `GDP` per capita, assuming all
+other variables remain constant (HDI and region).
+
+**Regions:**
+
+*americas:* The predicted `life expectancy` increases by about 3.4 years
+more for countries in the `americas` region than countries in `africa`
+region assuming all other variables remain constant (HDI and GDP).
+
+*asia:* The predicted `life expectancy` increases by about 2.6 years
+more for countries in the `asia` region than countries in `africa`
+region assuming all other variables remain constant (HDI and GDP).
+
+*europe:* The predicted `life expectancy` increases by about 3.2 years
+more for countries in the `europe` region than countries in `africa`
+region assuming all other variables remain constant (HDI and GDP).
+
+*africa:* The predicted `life expectancy` is about 49 years if `HDI` and
+`GDP` are 0 and the region is `africa`. Note, however, this is
+unrealistic given the context as it does not make sense for `HDI` and
+`GDP`to be 0.
+
+### Evaluating the Model
+
+```{r}
+plot(secondmultiv, which = 1)
+plot(secondmultiv, which = 2) 
+```
+
+L - Good. The residuals vs fitted plot shows us a strong linearity
+between the variables since they cluster evenly about the zero line.
+
+I - Okay. The assumption of independence is reasonably met because there
+are no obvious dependencies or patterns within the data or between the
+individual observations. However, we should still be aware of potential
+regional similarities/ dependencies between countries that exist in the
+same region.
+
+N - Good. The Q-Q plot shows the data lying closely along the line. This
+means it is reasonable to assume general normal distribution among the
+variables.
+
+E - Okay. The residuals vs fitted plot show a generally good fit. There
+is a bit more clustering/ tighter fit as the plot moves towards the
+right. This means there is an assumption of equal variance
+(Homoscedasticity), for the most part.
+
+### Model Summary
+
+```{r}
+summary(secondmultiv)
+```
+
+#### p-value(s)
+
+**Human Dev Index:** $p-value=3.75e-15$
+
+Since the p-value of the `HDI` is very small (threshold: $p<=0.05$), we
+can say that the slope is significantly different from 0. Therefore it
+is *statistically significant*.
+
+**GDP:** $p-value=0.144240$
+
+Since the p-value of the `GDP` is not considered small (threshold:
+$p<=0.05$), we *cannot* say that the slope is significantly different
+from 0. Therefore it is NOT *statistically significant*.
+
+**Regions:** *NOTE:* As long as one of the categorical indicators has
+slope significantly different from zero, then we include in the model.
+
+*americas:* $p-value=0.000289$
+
+Since the p-value of the `americas` region is very small (threshold:
+$p<=0.05$), we can say that the slope for `americas` region vs `africa`
+region is significantly different from zero.
+
+*asia:* $p-value=0.001011$
+
+Since the p-value of the `asia` region is very small (threshold:
+$p<=0.05$), we can say that the slope for `asia` region vs `africa`
+region is significantly different from zero.
+
+*europe:* $p-value=0.003322$
+
+Since the p-value of the `europe` region is very small (threshold:
+$p<=0.05$), we can say that the slope for `europe` region vs `africa`
+region is significantly different from zero.
+
+#### $R^2$
+
+$R^2=0.771$
+
+This means that about 77.10% of the variation in `life expectancy` is
+explained by the model containing `HDI`, `GDP`, and `world_4regions`.
+
+#### Adjusted $R^2$
+
+$R^2_{adj}=0.7645$
+
+The adjusted $R^2$ value accounts for additional independent variables.
+Therefore, this tells us that about 76.45% of the variation in
+`life expectancy` is explained by the model containing `HDI`, `GDP`, and
+`world_4regions`.
+
+#### RSE
+
+$RSE=3.388$
+
+This means that the "average" distance of the `life expectancy` from its
+predicted value is about 3.4 years.
+
+# Comparing Models
+
+TODO: 1. Which model is the best?
+
+# Questions About the Data
+
+TODO: 1. Ask a question (Should explore relationship between at least 2
+variables in the dataset) 2. Answer the question 3. Create a graph/plot
+that helps answer the question
+
+*Question:*
+
+```{r}
+```
+
+*Answer:*
