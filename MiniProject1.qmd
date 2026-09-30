@@ -1,10 +1,10 @@
 ---
 title: "MiniProject1"
 author: "Grace Rubio, Oyinda Sanni, Mia Mason"
-format: pdf
-editor: 
-  markdown: 
-    wrap: 72
+format: pdf 
+editor:    
+  markdown:      
+    wrap: 72 
 ---
 
 **Important Note** All code needs to have an answer to the "Where did u
@@ -15,10 +15,10 @@ get ur code" question
 ## Load in packages
 
 ```{r}
-#| label: setup
+#| label: setup 
 #| include: false
-library(tidyverse)
-library(tidymodels)
+#| library(tidyverse)
+#| library(tidymodels)
 ```
 
 ## Importing Data
@@ -27,9 +27,8 @@ library(tidymodels)
 
 ```{r}
 # Response Variable
-life_exp <-read_csv("Data/lex.csv") 
-
-# Predictor Variables
+life_exp <-read_csv("Data/lex.csv")   
+# Predictor Variables 
 CO2_emissions <-read_csv("Data/co2_cons.csv")
 gdp <-read_csv("Data/gdp_pcap.csv")
 humanDevIndx <-read_csv("Data/hdi_human_development_index.csv")
@@ -47,11 +46,10 @@ have a 2025 entry.
 ```{r}
 data_lst<- list(CO2_emissions, gdp, humanDevIndx, poverty, gapminder_2025)
 
-Full_2025<-life_exp
-
-for (dataset in data_lst){
- Full_2025 <- Full_2025|>
-  full_join(dataset, by="geo") 
+Full_2025<-life_exp 
+for (dataset in data_lst){  
+  Full_2025 <- Full_2025|>
+    full_join(dataset, by="geo")
 }
 
 Full_2025<-Full_2025|>
@@ -68,8 +66,7 @@ Full_2025<-Full_2025|>
          GDP=`2025.y`,
          Poverty = `2025`,
          HumDevIndx= `2023.x.x`
-         )
-
+         ) 
 ```
 
 # Variable Report
@@ -90,8 +87,8 @@ specifically. This way, we can explicitly distinguish if/why the
 cleaning performed in this section was necessary.
 
 ```{r}
-# Clean the Data 
-Full_2025<-Full_2025|>
+# Clean the Data
+Full_2025<-Full_2025|>   
   drop_na()
 ```
 
@@ -106,24 +103,19 @@ entries in the variable, so this column does require some cleaning.
 
 ### Summary Statistics
 
-TODO: Quantitative variables: include basic summary stats like mean,
-median, standard deviation, min, max, etc. 2a. Create an appropriate
-plot to show distribution of values 3. Look up country involved for any
-extreme outliers
-
 ```{r}
 #| echo: true
-#| fig-align: center
+#| fig-align: center  
 
 # SUMMARY
 CO2_summary <- Full_2025|>
-  summarize(avg_CO2 = mean(CO2), 
-                        sd_CO2 = sd(CO2), 
-                        min_CO2 = min(CO2), 
-                        max_CO2 = max(CO2), 
-                        mdn_CO2 = median(CO2), 
-                        iqr = IQR(CO2),
-                        sample_size = n())
+  summarize(avg_CO2 = mean(CO2),
+            sd_CO2 = sd(CO2),
+            min_CO2 = min(CO2),
+            max_CO2 = max(CO2),
+            mdn_CO2 = median(CO2),
+            iqr = IQR(CO2),
+            sample_size = n())
 CO2_summary
 
 # PLOT
@@ -133,10 +125,11 @@ Full_2025|>
   labs(x = "Total CO2 Emissions (Million Tonnes)",
        y = "Count",
        title = "Count of Country's Total CO2 Emission")+
-  # Add markers to identify outliers
-  geom_point(data = Full_2025[Full_2025$CO2 > 2000,],aes(x = CO2, y = 0), 
-             color = "red", shape = 1, size = 12)
 
+  # Add markers to identify outliers
+  geom_point(data = Full_2025[Full_2025$CO2 > 2000,],
+             aes(x = CO2, y = 0),
+             color = "red", shape = 1, size = 12) 
 ```
 
 ### Variable Descriptions
@@ -159,92 +152,196 @@ emissions within a range of about 70 million tonnes.
 
 *Type:* This variable type is quantitative.
 
-*Info:*
+*Info:* GDP per capita is the gross domestic product which is the total
+moetary value of all goods and services produced in a country in a given
+year. The values in this dataset are stored as float values. GDP per
+capita is recorded in US dollars, specifically PPP\$ or purchasing power
+parity, and values are adjusted for inflation.
 
 ### Summary Statistics
 
-TODO: Quantitative variables: include basic summary stats like mean,
-median, standard deviation, min, max, etc. 2a. Create an appropriate
-plot to show distribution of values 3. Look up country involved for any
-extreme outliers
-
 ```{r}
+#| echo: true
+#| fig-align: center
 
+# SUMMARY
+GDP_summary <- Full_2025|>
+  summarize(avg_GDP = mean(GDP),
+            sd_GDP = sd(GDP),
+            min_GDP = min(GDP),
+            max_GDP = max(GDP),
+            mdn_GDP = median(GDP),
+            iqr = IQR(GDP),
+            sample_size = n())
+GDP_summary
+
+# PLOT
+Full_2025|>
+  ggplot(mapping=aes(x = GDP)) +
+  geom_histogram(binwidth = 3000, color = '#ACC7B4', fill = "#331B3F") +
+  labs(x = "Total GDP per Capita (Dollars)",
+       y = "Count",
+       title = "Count of Country's Total GDP per Capita")+
+# Add markers to identify outliers
+  geom_point(data = Full_2025[Full_2025$GDP > 90000,],
+             aes(x = GDP, y = 0),
+             color = "red", shape = 1, size = 12)
 ```
 
 ### Variable Descriptions
 
-TODO: 1. Write a few sentences for each variable to describe what we
-have learned about the variable. Incorporate information from the
-Summary Statistics
+The distribution of GDP per capita across the listed countries in the
+Full_2025 dataset is concentrated on the right side of the graph, with a
+majority of it being below \$25,000. There are four outliers which reach
+up to around \$140,000, causing the mean to be higher in the summary.
+Given the summary, the average GDP per capita is \~\$24,859, which
+comparing to the median of \$15,343 highlights the right-sided
+concentration. The IQR of \$32,353 provides a better sense of spread for
+this distribution, indicating that the middle 50% of countries fall
+within a range of roughly \$32,353.
 
 ## Human Development Index
 
 *Type:* This variable type is quantitative.
 
-*Info:*
+*Info:* The HumDevIndx variable is the measure of overall human
+well-being and development of a country. It combines three key
+dimensions of human development like health or longevity, education, and
+standard of living. These area measured by life expectancy at birth,
+mean years of schooling for adults and expected years of schooling for
+children, and the gross national income per capita respectively. The
+variable ranges from 0 to 1, where 1 indicates higher levels of human
+development, and is a float type.
 
 ### Summary Statistics
 
-TODO: Quantitative variables: include basic summary stats like mean,
-median, standard deviation, min, max, etc. 2a. Create an appropriate
-plot to show distribution of values 3. Look up country involved for any
-extreme outliers
-
 ```{r}
+#| echo: true
+#| fig-align: center
 
+# SUMMARY
+HumDevIndx_summary <- Full_2025|>
+  summarize(avg_HDI = mean(HumDevIndx),
+            sd_HDI = sd(HumDevIndx),
+            min_HDI = min(HumDevIndx),
+            max_HDI = max(HumDevIndx),
+            mdn_HDI = median(HumDevIndx),
+            iqr = IQR(HumDevIndx),
+            sample_size = n())
+HumDevIndx_summary
+
+# PLOT
+Full_2025|>
+  ggplot(mapping=aes(x = HumDevIndx)) +
+  geom_histogram(binwidth = 0.02, color = '#ACC7B4', fill = "#331B3F") +
+  labs(x = "Total Human Development Index",
+       y = "Count",
+       title = "Count of Country's Total Human Development Index")
 ```
 
 ### Variable Descriptions
 
-TODO: 1. Write a few sentences for each variable to describe what we
-have learned about the variable. Incorporate information from the
-Summary Statistics
+The distribution of the HDI scores across the countries is concentrated
+to the left, with the majority of them having an HDI score above 0.7.
+There are no extreme outliers in the distribution due to the variable
+being bound to a scale with a minimum of 0.388 and a maximum of 0.972.
+Given the results of the summary for the variable, the average HDI score
+across countries is approximately 0.734. Comparing the mean to the
+median of 0.75, the slight left skew becomes apparent, as the middle
+value sits slightly higher than the average due to the tail of lower HDI
+scores bringing the mean down. The IQR shows that the middle 50% of
+countries fall within a narrow range of about 0.236.
 
 ## People in Poverty
 
 *Type:* This variable type is quantitative.
 
-*Info:*
+*Info:* The poverty variable records the estimated population in a
+country whose daily income or consumption falls before the international
+extreme poverty threshold. The unit of measure is number of people.
 
 ### Summary Statistics
 
-TODO: Quantitative variables: include basic summary stats like mean,
-median, standard deviation, min, max, etc. 2a. Create an appropriate
-plot to show distribution of values 3. Look up country involved for any
-extreme outliers
-
 ```{r}
+#| echo: true
+#| fig-align: center
 
+# SUMMARY
+Poverty_summary <- Full_2025|>
+  summarize(avg_Poverty = mean(Poverty),
+            sd_Poverty = sd(Poverty),
+            min_Poverty = min(Poverty),
+            max_Poverty = max(Poverty),
+            mdn_Poverty = median(Poverty),
+            iqr = IQR(Poverty),
+            sample_size = n()) 
+Poverty_summary
+
+# PLOT
+Full_2025|>   
+  ggplot(mapping=aes(x = Poverty)) +
+  geom_histogram(binwidth = 3000000, color = '#ACC7B4', fill = "#331B3F") +
+  labs(x = "Total Poverty Population (Millions of People)",
+       y = "Count",
+       title = "Count of Country's Total Poverty Population")+
+
+# Add markers to identify outliers
+  geom_point(data = Full_2025[Full_2025$Poverty > 40000000,],
+             aes(x = Poverty, y = 0),
+             color = "red", shape = 1, size = 12)
 ```
 
 ### Variable Descriptions
 
-TODO: 1. Write a few sentences for each variable to describe what we
-have learned about the variable. Incorporate information from the
-Summary Statistics
+The distribution of the total poverty population across the countries is
+very right-skewed, with the majority of them being clustered below 10
+million. There are four distinct outliers to the right with the maximum
+reaching a population as high as 95,605,313 people. This maximum value
+strongly influences the results of the summary table and should be taken
+into account for the analysis. From the summary results, the average
+poverty population per country is 4,615,385 people, and a very high
+standard deviation of 12,475,121. Comparing the mean to the median of
+182,163 people, the extreme right skew is very evident and shows how the
+few high-poverty countries inflate the mean. The IQR shoes that the
+middle 50% of countries have a poverty population spanning a range of
+about 2.42 million people.
 
 ## Region
 
 *Type:* This variable type is categorical.
 
-*Info:*
+*Info:* The region variable stores information about the continent in
+which the country is located in. The variable can be one of the four
+following values: americas (includes north and south), africa, asia, and
+europe.
 
 ### Summary Statistics
 
-TODO: 1. Categorical variables: create a table of possible values and
-include counts or proportions. 1a. Create an appropriate plot to show
-distribution of values
-
 ```{r}
+#| echo: true
+#| fig-align: center
 
+# SUMMARY
+region_summary <- Full_2025|>
+  group_by(world_4region) |>
+  summarize(count = n())
+region_summary  
+
+# PLOT 
+Full_2025|>
+  ggplot(mapping=aes(x = world_4region)) +
+  geom_bar(color = '#ACC7B4', fill = "#331B3F") +
+  labs(x = "World Regions",
+       y = "Count", 
+       title = "Distribution of Countries Across World Regions")
 ```
 
 ### Variable Descriptions
 
-TODO: 1. Write a few sentences for each variable to describe what we
-have learned about the variable. Incorporate information from the
-Summary Statistics
+Africa and Asia are the most represented regions out of the countries in
+the dataset with their counts being 53 and 52 respectively. The Americas
+are the least represented world region being the minimum at 34 total
+countries.
 
 # Linear Models
 
@@ -253,7 +350,6 @@ Evaluate the models for LINE(Q-Q plots needed), p-values ,R2, and
 adjusted R2, RSE, MSE, RMSE
 
 ```{r}
-
 ```
 
 # Comparing Models
@@ -267,5 +363,4 @@ variables in the dataset) 2. Answer the question 3. Create a graph/plot
 that helps answer the question
 
 ```{r}
-
 ```
