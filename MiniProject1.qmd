@@ -252,20 +252,25 @@ TODO: 1. Make at least 3 linear models (1 simple, 2 multivariate) 2.
 Evaluate the models for LINE(Q-Q plots needed), p-values ,R2, and
 adjusted R2, RSE, MSE, RMSE
 
-## GDP per Capita: Simple Linear Model 
+## GDP per Capita: Simple Linear Model
 
 ```{r}
 lifegdp=Full_2025|>
   lm(life_Exp~GDP, data= _) 
 lifegdp
 ```
+
 ### Interpreting the Slope
 
-*Equation:* $\hat{y}_{LifeExp}=0.6851+0.0001935x_{GDP}$
+*Equation:* $\hat{y}_{LifeExp}=68.51+0.0001935x_{GDP}$
 
 *Slope:* 0.0001935
 
-*Interpretation:* The slope of this model tells us that For every \$1 increase in gdp per capita there will be a 0.0001935 year increase in predicted life expectancy. In other words, the predicted life expectancy of a country increases by 1.9 years for every \$10,000 increase in GDP.
+*Interpretation:* The slope of this model tells us that For every \$1
+increase in gdp per capita there will be a 0.0001935 year increase in
+predicted life expectancy. In other words, the predicted
+`life expectancy` of a country increases by 1.9 years for every \$10,000
+increase in `GDP`.
 
 ### Evaluating the Model
 
@@ -273,51 +278,79 @@ lifegdp
 plot(lifegdp, which = 1)
 plot(lifegdp, which = 2) 
 ```
-L - Bad. The residuals vs fitted plot shows us a poor linearity between the variables. We can see this because the points do not cluster/ evenly distribute around zero. We can aslo see the line curve downwards as the fitted values increase. 
 
-I - Not good. There are patterns in the geographic location/region of the data. As such, we cannot assume independence. 
+L - Bad. The residuals vs fitted plot shows us a poor linearity between
+the variables. We can see this because the points do not cluster/ evenly
+distribute around zero. We can aslo see the line curve downwards as the
+fitted values increase.
 
-N - Ok. The Q-Q plot shows the data lying closely along the line for (the most part). While there is some minor divergence (especially towards the end), we can still say that it is reasonable to assume general normal distribution among the variables.  
+I - Not good. There are patterns in the geographic location/region of
+the data. As such, we cannot assume independence.
 
-E - Bad. The variance declines as fitted value increases (i.e., the variance is NOT constant). 
+N - Okay. The Q-Q plot shows the data lying closely along the line for
+(the most part). While there is some minor divergence (especially
+towards the end), we can still say that it is reasonable to assume
+general normal distribution among the variables.
 
-### Model Summary 
+E - Bad. The variance declines as fitted value increases (i.e., the
+variance is NOT constant).
+
+### Model Summary
+
 ```{r}
 summary(lifegdp)
 ```
+
 #### p-value
 
-**p-value=2.2e-16**
+$p-value=2.2e-16$
 
-Since the p-value is very small (threshold: $p<=0.05$), we can say that the slope is significantly different from 0.
+Since the p-value is very small (threshold: $p<=0.05$), we can say that
+the slope is significantly different from 0. Therefore it is
+*statistically significant*.
 
 #### $R^2$
 
 $R^2 = 0.5041$
 
-50.41% of the variation of life expectancy is explained by the linear model including gdp per capita.
+50.41% of the variation of life expectancy is explained by the linear
+model including gdp per capita.
 
 #### RSE
 
 $RSE = 4.93$
 
-The "average" distance of the life expectancy from its predicted value is about 5 years.
+The "average" distance of the life expectancy from its predicted value
+is about 5 years.
 
-## Poverty & CO2 Emissions: Multivariate Model
+## Poverty & Human Development Index: Multivariate Model
 
 ```{r}
 firstmultiv=Full_2025|>
-  lm(life_Exp~CO2+Poverty, data= _) 
+  lm(life_Exp~HumDevIndx+Poverty, data= _) 
 firstmultiv
 ```
 
 ### Interpreting the Slope
 
-*Equation:* $x$
+*Equation:*
+$\hat{y}_{LifeExp}=44.07+39.85x_{HumDevIndx}+0.000000003099x_{Poverty}$
 
-*Slope:* 
+*Slope:*
+
+**Human Dev Index:** 39.85
+
+**Poverty:** 0.000000003099
 
 *Interpretation:*
+
+**Human Dev Index:** The predicted `life expectancy` increases by about
+4 years with every 0.1 unit increase in the `Human Development Index`,
+when the number of people in `poverty` remains constant.
+
+**Poverty:** The predicted `life expectancy` increases by about 0.31
+years with every 100 million person increase in the number of people in
+`poverty`, when the `Human Development Index` is held constant.
 
 ### Evaluating the Model
 
@@ -326,15 +359,25 @@ plot(firstmultiv, which = 1)
 plot(firstmultiv, which = 2) 
 ```
 
-L - 
+L - Good. The residuals vs fitted plot shows us a strong linearity
+between the variables since they cluster evenly about the zero line.
 
-I - 
+I - Good. The data contains entries from individual countries for the
+your 2025 and do not repeat/ have duplicates. Therefore, it is
+reasonable to assume that the data has no direct relationship/ influence
+to each other.
 
-N - 
+N - Okay. The Q-Q plot shows the data lying closely along the line with
+some dispersion at the ends of the data line. This means it is
+reasonable to assume a somewhat general normal distribution among the
+variables.
 
-E - 
+E - Okay. The residuals vs fitted plot show a generally good fit. There
+is a bit more clustering/ tighter fit as the plot moves towards the
+right. This means there is an assumption of equal variance
+(Homoscedasticity), for the most part.
 
-### Model Summary 
+### Model Summary
 
 ```{r}
 summary(firstmultiv)
@@ -342,13 +385,43 @@ summary(firstmultiv)
 
 #### p-value(s)
 
+**HDI:** $p-value=2.2e-16$
+
+Since the p-value of the `HDI` is very small (threshold: $p<=0.05$), we
+can say that the slope is significantly different from 0. Therefore it
+is *statistically significant*.
+
+**Poverty:** $p-value=0.893$
+
+Since the p-value of the number of people in `Poverty` is not considered
+small (threshold: $p<=0.05$), we *cannot* say that the slope is
+significantly different from 0. Therefore it is NOT *statistically
+significant*.
+
 #### $R^2$
+
+$R^2 = 0.7499$
+
+This means that about 74.99% of the variation in `life expectancy` is
+explained by the model containing `HDI`and `Poverty`.
 
 #### Adjusted $R^2$
 
+$R^2_{adj}=0.7471$
+
+The adjusted $R^2$ value accounts for additional independent variables.
+Therefore, this tells us that about 74.71% of the variation in
+`life expectancy` is explained by the model containing `HDI`and
+`Poverty`.
+
 #### RSE
 
-## Human Development Index & GDP & Region: Multivariate Model
+$RSE=3.511$
+
+This means that the "average" distance of the `life expectancy` from its
+predicted value is about 3.5 years.
+
+## Human Dev Index & GDP & Region: Multivariate Model
 
 ```{r}
 secondmultiv=Full_2025|>
@@ -359,11 +432,52 @@ secondmultiv
 
 ### Interpreting the Slope
 
-*Equation:* $x$
+*Equation:*
+$\hat{y}_{LifeExp}=48.59+29.95x_{HumDevIndx}+0.00002487x_{GDP}+3.412x_{americas}+2.621x_{asia}+3.201x_{europe}$
 
-*Slope:* 
+*Slope:*
+
+**HDI:** 29.95
+
+**GDP:** 0.00002487
+
+**Region_americas:** 3.412
+
+**Region_asia:** 2.621
+
+**Region_europe:** 3.201
+
+**Region_africa:** This is our Categorical indicator. Note that if all
+other world_4regions are 0, then `world_4regionafrica` is 1.
 
 *Interpretation:*
+
+**Human Dev Index:** The predicted `life expectancy` increases by about
+3 years with every 0.1 unit increase in the `Human Development Index`,
+assuming all other variables remain constant (GDP and region).
+
+**GDP:** The predicted `life expectancy` increases by about 2.5 years
+with every \$100,000 increase in the `GDP` per capita, assuming all
+other variables remain constant (HDI and region).
+
+**Regions:**
+
+*americas:* The predicted `life expectancy` increases by about 3.4 years
+more for countries in the `americas` region than countries in `africa`
+region assuming all other variables remain constant (HDI and GDP).
+
+*asia:* The predicted `life expectancy` increases by about 2.6 years
+more for countries in the `asia` region than countries in `africa`
+region assuming all other variables remain constant (HDI and GDP).
+
+*europe:* The predicted `life expectancy` increases by about 3.2 years
+more for countries in the `europe` region than countries in `africa`
+region assuming all other variables remain constant (HDI and GDP).
+
+*africa:* The predicted `life expectancy` is about 49 years if `HDI` and
+`GDP` are 0 and the region is `africa`. Note, however, this is
+unrealistic given the context as it does not make sense for `HDI` and
+`GDP`to be 0.
 
 ### Evaluating the Model
 
@@ -372,15 +486,25 @@ plot(secondmultiv, which = 1)
 plot(secondmultiv, which = 2) 
 ```
 
-L - 
+L - Good. The residuals vs fitted plot shows us a strong linearity
+between the variables since they cluster evenly about the zero line.
 
-I - 
+I - Okay. The assumption of independence is reasonably met because there
+are no obvious dependencies or patterns within the data or between the
+individual observations. However, we should still be aware of potential
+regional similarities/ dependencies between countries that exist in the
+same region.
 
-N - 
+N - Good. The Q-Q plot shows the data lying closely along the line. This
+means it is reasonable to assume general normal distribution among the
+variables.
 
-E - 
+E - Okay. The residuals vs fitted plot show a generally good fit. There
+is a bit more clustering/ tighter fit as the plot moves towards the
+right. This means there is an assumption of equal variance
+(Homoscedasticity), for the most part.
 
-### Model Summary 
+### Model Summary
 
 ```{r}
 summary(secondmultiv)
@@ -388,11 +512,61 @@ summary(secondmultiv)
 
 #### p-value(s)
 
+**Human Dev Index:** $p-value=3.75e-15$
+
+Since the p-value of the `HDI` is very small (threshold: $p<=0.05$), we
+can say that the slope is significantly different from 0. Therefore it
+is *statistically significant*.
+
+**GDP:** $p-value=0.144240$
+
+Since the p-value of the `GDP` is not considered small (threshold:
+$p<=0.05$), we *cannot* say that the slope is significantly different
+from 0. Therefore it is NOT *statistically significant*.
+
+**Regions:** *NOTE:* As long as one of the categorical indicators has
+slope significantly different from zero, then we include in the model.
+
+*americas:* $p-value=0.000289$
+
+Since the p-value of the `americas` region is very small (threshold:
+$p<=0.05$), we can say that the slope for `americas` region vs `africa`
+region is significantly different from zero.
+
+*asia:* $p-value=0.001011$
+
+Since the p-value of the `asia` region is very small (threshold:
+$p<=0.05$), we can say that the slope for `asia` region vs `africa`
+region is significantly different from zero.
+
+*europe:* $p-value=0.003322$
+
+Since the p-value of the `europe` region is very small (threshold:
+$p<=0.05$), we can say that the slope for `europe` region vs `africa`
+region is significantly different from zero.
+
 #### $R^2$
+
+$R^2=0.771$
+
+This means that about 77.10% of the variation in `life expectancy` is
+explained by the model containing `HDI`, `GDP`, and `world_4regions`.
 
 #### Adjusted $R^2$
 
+$R^2_{adj}=0.7645$
+
+The adjusted $R^2$ value accounts for additional independent variables.
+Therefore, this tells us that about 76.45% of the variation in
+`life expectancy` is explained by the model containing `HDI`, `GDP`, and
+`world_4regions`.
+
 #### RSE
+
+$RSE=3.388$
+
+This means that the "average" distance of the `life expectancy` from its
+predicted value is about 3.4 years.
 
 # Comparing Models
 
