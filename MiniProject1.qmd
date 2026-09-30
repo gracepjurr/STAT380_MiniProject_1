@@ -92,6 +92,57 @@ Full_2025<-Full_2025|>
   drop_na()
 ```
 
+## Life Expectancy at Birth
+
+*Type:* This variable type is quantitative.
+
+*Info:* The Life Expectancy at Birth variable is the average number of
+years a hypothetical newborn child will live if the age-specific
+mortality rates observed in a country during that specific year were to
+remain constant throughout their lifetime. It is an accumulation of
+broader health standards, healthcare access, sanitation, nutrition, and
+disease exposure in the given country.
+
+### Summary Statistics
+
+```{r}
+#| echo: true
+#| fig-align: center  
+
+# SUMMARY
+LifeExp_summary <- Full_2025|>
+  summarize(avg_LifeExp = mean(life_Exp),
+            sd_LifeExp = sd(life_Exp),
+            min_LifeExp = min(life_Exp),
+            max_LifeExp = max(life_Exp),
+            mdn_LifeExp = median(life_Exp),
+            iqr = IQR(life_Exp),
+            sample_size = n())
+LifeExp_summary
+
+# PLOT
+Full_2025|>
+  ggplot(mapping = aes(x = life_Exp)) +
+  geom_histogram(binwidth = 3, color = '#ACC7B4', fill = "#331B3F") +
+  labs(x = "Total Life Expectancy",
+       y = "Count",
+       title = "Count of Country's Total Life Expectancy at Birth")
+```
+
+### Variable Descriptions
+
+The distribution of the variable is slightly left skewed with the
+majority of the countries life expectancy being concentrated between 70
+and 80 years. There are no severe outliers visible in the distribution.
+The minimum life expectancy is 55.48 years, and the maximum is 85.71
+years. Given the results of the summary table for the variable, the
+average life expectancy at birth is approximately 73.31 years, with a
+standard deviation of 6.98 years. When comparing the mean to the median
+of 74.12 years, this highlights the slight left skew as the countries
+with shorter life expediencies pull the mean slightly below the median
+value. The IQR says that the middle 50% of countries fall within a range
+of about 10.29 years.
+
 ## CO2 Emissions
 
 *Type:* This variable type is quantitative.
@@ -101,7 +152,7 @@ This variable can take numeric or NAN values. The CO2 emissions column
 is measured in million tonnes of CO2. There are currently two missing
 entries in the variable, so this column does require some cleaning.
 
-### Summary Statistics
+### Summary Statistics (By Itself)
 
 ```{r}
 #| echo: true
@@ -130,6 +181,41 @@ Full_2025|>
   geom_point(data = Full_2025[Full_2025$CO2 > 2000,],
              aes(x = CO2, y = 0),
              color = "red", shape = 1, size = 12) 
+
+```
+
+### Summary Statistics (W/ Response Variable)
+
+```{r}
+#| echo: true
+#| fig-align: center  
+
+#SUMMARY
+LifeExp_CO2_summary <- Full_2025|>
+  summarize(avg_LifeExp = mean(life_Exp),
+            sd_LifeExp = sd(life_Exp),
+            min_LifeExp = min(life_Exp),
+            max_LifeExp = max(life_Exp),
+            mdn_LifeExp = median(life_Exp),
+            iqr_LifeExp = IQR(life_Exp),
+            
+            avg_CO2 = mean(CO2),
+            sd_CO2 = sd(CO2),
+            min_CO2 = min(CO2),
+            max_CO2 = max(CO2),
+            mdn_CO2 = median(CO2),
+            iqr_CO2 = IQR(CO2),
+            
+            sample_size = n())
+LifeExp_CO2_summary
+
+#PLOT
+Full_2025|>
+  ggplot(aes(x = CO2, y = life_Exp)) +
+  geom_point() +
+  labs(x = "CO2 emissions (Million Tonnes)",
+       y = "Life Expectancy at Birth",
+       title = "Life expectancy at Birth vs. CO2 Emissions")
 ```
 
 ### Variable Descriptions
@@ -158,7 +244,7 @@ year. The values in this dataset are stored as float values. GDP per
 capita is recorded in US dollars, specifically PPP\$ or purchasing power
 parity, and values are adjusted for inflation.
 
-### Summary Statistics
+### Summary Statistics (By Itself)
 
 ```{r}
 #| echo: true
@@ -188,6 +274,40 @@ Full_2025|>
              color = "red", shape = 1, size = 12)
 ```
 
+### Summary Statistics (W/ Response Variable)
+
+```{r}
+#| echo: true
+#| fig-align: center  
+
+#SUMMARY
+LifeExp_GDP_summary <- Full_2025|>
+  summarize(avg_LifeExp = mean(life_Exp),
+            sd_LifeExp = sd(life_Exp),
+            min_LifeExp = min(life_Exp),
+            max_LifeExp = max(life_Exp),
+            mdn_LifeExp = median(life_Exp),
+            iqr_LifeExp = IQR(life_Exp),
+            
+            avg_GDP = mean(GDP),
+            sd_GDP = sd(GDP),
+            min_GDP = min(GDP),
+            max_GDP = max(GDP),
+            mdn_GDP = median(GDP),
+            iqr_GDP = IQR(GDP),
+            
+            sample_size = n())
+LifeExp_GDP_summary
+
+#PLOT
+Full_2025|>
+  ggplot(aes(x = GDP, y = life_Exp)) +
+  geom_point() +
+  labs(x = "GDP per Capita (US$)",
+       y = "Life Expectancy at Birth",
+       title = "Life expectancy at Birth vs. GDP per Capita")
+```
+
 ### Variable Descriptions
 
 The distribution of GDP per capita across the listed countries in the
@@ -213,7 +333,7 @@ children, and the gross national income per capita respectively. The
 variable ranges from 0 to 1, where 1 indicates higher levels of human
 development, and is a float type.
 
-### Summary Statistics
+### Summary Statistics (By Itself)
 
 ```{r}
 #| echo: true
@@ -239,6 +359,40 @@ Full_2025|>
        title = "Count of Country's Total Human Development Index")
 ```
 
+### Summary Statistics (W/ Response Variable)
+
+```{r}
+#| echo: true
+#| fig-align: center  
+
+#SUMMARY
+LifeExp_HDI_summary <- Full_2025|>
+  summarize(avg_LifeExp = mean(life_Exp),
+            sd_LifeExp = sd(life_Exp),
+            min_LifeExp = min(life_Exp),
+            max_LifeExp = max(life_Exp),
+            mdn_LifeExp = median(life_Exp),
+            iqr_LifeExp = IQR(life_Exp),
+            
+            avg_HDI = mean(HumDevIndx),
+            sd_HDI = sd(HumDevIndx),
+            min_HDI = min(HumDevIndx),
+            max_HDI = max(HumDevIndx),
+            mdn_HDI = median(HumDevIndx),
+            iqr_HDI = IQR(HumDevIndx),
+            
+            sample_size = n())
+LifeExp_HDI_summary
+
+#PLOT
+Full_2025|>
+  ggplot(aes(x = HumDevIndx, y = life_Exp)) +
+  geom_point() +
+  labs(x = "Human Development Index",
+       y = "Life Expectancy at Birth",
+       title = "Life expectancy at Birth vs. CO2 Emissions")
+```
+
 ### Variable Descriptions
 
 The distribution of the HDI scores across the countries is concentrated
@@ -260,7 +414,7 @@ countries fall within a narrow range of about 0.236.
 country whose daily income or consumption falls before the international
 extreme poverty threshold. The unit of measure is number of people.
 
-### Summary Statistics
+### Summary Statistics (By Itself)
 
 ```{r}
 #| echo: true
@@ -291,6 +445,40 @@ Full_2025|>
              color = "red", shape = 1, size = 12)
 ```
 
+### Summary Statistics (W/ Response Variable)
+
+```{r}
+#| echo: true
+#| fig-align: center  
+
+#SUMMARY
+LifeExp_Poverty_summary <- Full_2025|>
+  summarize(avg_LifeExp = mean(life_Exp),
+            sd_LifeExp = sd(life_Exp),
+            min_LifeExp = min(life_Exp),
+            max_LifeExp = max(life_Exp),
+            mdn_LifeExp = median(life_Exp),
+            iqr_LifeExp = IQR(life_Exp),
+            
+            avg_Poverty = mean(Poverty),
+            sd_Poverty = sd(Poverty),
+            min_Poverty = min(Poverty),
+            max_Poverty = max(Poverty),
+            mdn_Poverty = median(Poverty),
+            iqr_Poverty = IQR(Poverty),
+            
+            sample_size = n())
+LifeExp_Poverty_summary
+
+#PLOT
+Full_2025|>
+  ggplot(aes(x = Poverty, y = life_Exp)) +
+  geom_point() +
+  labs(x = "Ppulation of Poverty",
+       y = "Life Expectancy at Birth",
+       title = "Life expectancy at Birth vs. CO2 Emissions")
+```
+
 ### Variable Descriptions
 
 The distribution of the total poverty population across the countries is
@@ -315,7 +503,7 @@ which the country is located in. The variable can be one of the four
 following values: americas (includes north and south), africa, asia, and
 europe.
 
-### Summary Statistics
+### Summary Statistics (By Itself)
 
 ```{r}
 #| echo: true
@@ -334,6 +522,33 @@ Full_2025|>
   labs(x = "World Regions",
        y = "Count", 
        title = "Distribution of Countries Across World Regions")
+```
+
+### Summary Statistics (W/ Response Variable)
+
+```{r}
+#| echo: true
+#| fig-align: center  
+
+#SUMMARY
+LifeExp_region_summary <- Full_2025|>
+  group_by(world_4region) |>
+  summarize(avg_LifeExp = mean(life_Exp),
+          sd_LifeExp = sd(life_Exp),
+          min_LifeExp = min(life_Exp),
+          max_LifeExp = max(life_Exp),
+          mdn_LifeExp = median(life_Exp),
+          iqr_LifeExp = IQR(life_Exp),
+          count = n())
+LifeExp_region_summary
+
+#PLOT
+Full_2025|>
+  ggplot(aes(x = world_4region, y = life_Exp)) +
+  geom_boxplot() +
+  labs(x = "World Regions",
+       y = "Life Expectancy at Birth",
+       title = "Life expectancy at Birth vs. World Regions")
 ```
 
 ### Variable Descriptions
