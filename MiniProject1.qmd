@@ -883,15 +883,29 @@ predicted value is about 3.4 years.
 
 TODO: 1. Which model is the best?
 
+The Human Development Index, GDP, and Region model performed te best. Its adjusted R^2 is 0.7645, this means there is a 0.7645 variation in the life expectancy explained in the variables after we accounted for the predictors. It also has the lowest RSE of 3.888 so the prediction are fairly close to the actual life expectancy.
+The simple GDP model performed the worst because it only explains about 0.5041 of teh variation in life expectancy and has the highest RSE of 4.93 years. The HDI and poverty model did better, but it has a lower adjusted R^2 of 0.7471 and it RSE is slighly higher than in the The Human Development Index, GDP, and Region model of 3.511.
+Therefore, based on adjusted R², RSE, and the LINE assumptions, the Human Development Index, GDP, and Region model provides the best fit.
+
 # Questions About the Data
 
 TODO: 1. Ask a question (Should explore relationship between at least 2
 variables in the dataset) 2. Answer the question 3. Create a graph/plot
 that helps answer the question
 
-*Question:*
+*Does the relationship between Human Development Index and life expectancy differ across world regions?*
 
 ```{r}
-```
+Full_2025 |>
+  ggplot(aes(x = HumDevIndx, y = life_Exp, color = world_4region)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    x = "Human Development Index",
+    y = "Life Expectancy at Birth",
+    color = "World Region",
+    title = "Life Expectancy vs. Human Development Index by Region"
+  )
+*There is a positive relationship between Human Development Index and life expectancy.Countries with higher HDI values tend to have higher life expectancy. The graph also shows differences between regions. Countries within the same HDI range can have different life expectancies depending on their region. This supports the results from our multivariate model, where HDI was more and region also contributed to explaining differences in life expectancy.*
 
-*Answer:*
+```
